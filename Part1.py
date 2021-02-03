@@ -118,7 +118,7 @@ def distance(x1, y1, x2,y2):
     return math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2))
         
 def findNearestPoint(pt_gps, coordinate_sort_lon, coordinate_sort_lat):
-    nearest_by_lon = coordinate_sort_lon.iloc[binaryNearest(coordinate_sort_lat, pt_gps[0],'lon'),:]
+    nearest_by_lon = coordinate_sort_lon.iloc[binaryNearest(coordinate_sort_lon, pt_gps[0],'lon'),:]
     distMax = distance(pt_gps[0], pt_gps[1], nearest_by_lon['lon'], nearest_by_lon['lat'])
     
     #on prends les bornes min et max de recherche
@@ -135,6 +135,7 @@ def findNearestPoint(pt_gps, coordinate_sort_lon, coordinate_sort_lat):
         d = distance(pt_gps[0],pt_gps[1],coordinate_sort_lat.iloc[i,:]['lon'],coordinate_sort_lat.iloc[i,:]['lat'])
         if d < distMin:
             nearest = i
+            distMin = d
     return coordinate_sort_lat.iloc[nearest,:]
 
 
@@ -249,7 +250,7 @@ quickSort(coordinate_sort_lon, 'lon')
 
 
 
-pt_gpx = read_gpx(open('gpx/Brocante-Culee-26-05-2021.gpx', 'r'))
+pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
 
 for i in range(len(pt_gpx)):
@@ -258,7 +259,7 @@ for i in range(len(pt_gpx)):
     print("ID : "+str(ret['id']))
     print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
     print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
-    check_way_from_point(ret['id'],root)
+    check_way_from_point(int(ret['id']),root)
     print()    
 
 
