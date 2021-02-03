@@ -26,7 +26,7 @@ class OSMHandler(osm.SimpleHandler):
         self.tag_inventory(n, "node")
 
 #Récupération des coordonnées des noeuds du fichier .OSM et sortie sous coordiantes 
-        # qui est DF (id,lat,lon) à partir du fichier "map.osm"
+        # qui est DF (id,lat,lon) à partir du fichier "map.osm" 
 
 osmhandler = OSMHandler()
 osmhandler.apply_file("map.osm")
@@ -40,6 +40,9 @@ for i in range(len(df_osm)):
     coordinate.loc[i]['id']=int(df_osm.loc[i]['id'])    
     coordinate.loc[i]['lat']=df_osm.loc[i]['location'].y/10000000
     coordinate.loc[i]['lon']=df_osm.loc[i]['location'].x/10000000
+    
+ 
+    
     
     
 """Partie 2 : Fonction pour identifier les segments """
@@ -61,7 +64,14 @@ ways.name='paul'
 #exemple de point 
 test=int(coordinate.loc[1]['id'])
 
-def check_way_from_point(node_id) :
+#je sais pas ou mettre cette petite partie car elle sert à la fonction suivante mais n'a pas besoin d'etre recaclculer à chaque fois
+import xml.etree.ElementTree as ET
+root = ET.parse('map.osm').getroot()
+
+#La fonction prend en entrée l'identifiant d'un point et ressort une slite de liste
+# type ((identifiant,Nom),(identifiant,Nom),(identifiant,Nom))" 
+
+def check_way_from_point(node_id) :            
     output=list()
     for type_tag in root.iter('way'):
         way=ways()
@@ -91,9 +101,10 @@ def check_way_from_point(node_id) :
 """
 pour test 
 
-node_id=284161125 
+node_id=284161125           #  correspond à un point d'intersection
 
-correspond à un point d'intersection
+check_way_from_point(node_id)
+
 
 
 """
