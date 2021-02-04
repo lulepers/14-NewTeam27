@@ -35,9 +35,6 @@ def read_gpx(gpx_file):
 
 
 
-
-
-
 #QuickSort
 def quickSort(tab,name_col):
    quickSortHelper(tab,0,len(tab)-1,name_col)
@@ -255,38 +252,44 @@ def get_OSM_nodes(root) :
 
 
 
+def save_coordinate(tab, filename):
+    tab.to_pickle(filename)
+
+def load_coordinate(filename):
+    return pd.read_pickle(filename)
+
+root = ET.parse('cartes/map2.osm').getroot() 
+
+
+#pour charger une nouvelle carte
+# coordinate = get_OSM_nodes(root)  
+# coordinate=coordinate.reset_index(drop=True)
 
 
 
 
+# coordinate['lat']=pd.to_numeric(coordinate['lat'])
+# coordinate['lon']=pd.to_numeric(coordinate['lon'])
+     
+# coordinate_sort_lat =  coordinate.copy()
+# coordinate_sort_lon =  coordinate.copy()
 
 
+# coordinate_sort_lat.sort_values(by=['lat'])
+# coordinate_sort_lon.sort_values(by=['lon'])
 
+# save_coordinate(coordinate, 'dataFrame/tabSmall.tfk')
+# save_coordinate(coordinate_sort_lat, 'dataFrame/tabLatSmall.tfk')
+# save_coordinate(coordinate_sort_lon, 'dataFrame/tabLonSmall.tfk')
 
-root = ET.parse('cartes/map.osm').getroot() 
-coordinate = get_OSM_nodes(root)  
-coordinate=coordinate.reset_index(drop=True)
-
-coordinate['id']=int(coordinate['id'])
-
-
-# node_id=284161125           #  correspond à un point d'intersection
-
-# check_way_from_point(node_id,root)
-
-        
-coordinate_sort_lat =  coordinate.copy()
-coordinate_sort_lon =  coordinate.copy()
-
-quickSort(coordinate_sort_lat, 'lat')
-quickSort(coordinate_sort_lon, 'lon')
-
-
+coordinate = load_coordinate('dataFrame/tabSmall.tfk')
+coordinate_sort_lat = load_coordinate('dataFrame/tabLatSmall.tfk')
+coordinate_sort_lon = load_coordinate('dataFrame/tabLonSmall.tfk')
 
 pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
-node_list=pd.DataFrame(0.1,index=np.arange(len(pt_gpx)),columns=coordinate_colnames)
-
+node_list=pd.DataFrame(0.1,index=np.arange(len(pt_gpx)),columns=['id', 'lat', 'lon'])
+print("ok")
 
 for i in range(len(pt_gpx)):
 
@@ -301,11 +304,6 @@ for i in range(len(pt_gpx)):
     print()    
 
 
-
-""""
-partie test
-
-""""
 
 
 
