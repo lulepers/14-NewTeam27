@@ -92,8 +92,8 @@ def binaryNearest(tab, val, name_col, low = 0):
     
     
 def binaryNearestHelper(tab, val, low, high, name_col):  
-    mid = (high + low)//2   
-    if tab.iloc[mid,:][name_col] <= val and tab.iloc[mid+1,:][name_col] > val or high == low:
+    mid = (high + low)//2
+    if tab.iloc[mid,:][name_col] <= val and tab.iloc[mid+1,:][name_col] >= val or high-1 <= low:
         return mid
    
     else:
@@ -281,7 +281,7 @@ def save_coordinate(tab, filename):
 def load_coordinate(filename):
     return pd.read_pickle(filename)
 
-<<<<<<< HEAD
+
 root = ET.parse('cartes/map2.osm').getroot() 
 
 
@@ -292,27 +292,26 @@ root = ET.parse('cartes/map2.osm').getroot()
 #coordinate['lat']=pd.to_numeric(coordinate['lat'])
 #coordinate['lon']=pd.to_numeric(coordinate['lon'])
 
-=======
+
     
 """Partie 2 : Traitement unique des données OSM  """
->>>>>>> 8bc87c29990668cb03bfe3db45272597a6c8c094
+
 
 coordinate = load_coordinate('dataFrame/tabSmall.tfk')
 
 #lecture du .OSM
 root = ET.parse('map2.osm').getroot() 
-coordinate = get_OSM_nodes(root)  
-coordinate=coordinate.reset_index(drop=True)
+# coordinate = get_OSM_nodes(root)  
+# coordinate=coordinate.reset_index(drop=True)
 
-<<<<<<< HEAD
 
     
 # coordinate_sort_lat =  coordinate.copy()
 # coordinate_sort_lon =  coordinate.copy()
-=======
-coordinate['lat']=pd.to_numeric(coordinate['lat'])
-coordinate['lon']=pd.to_numeric(coordinate['lon'])
->>>>>>> 8bc87c29990668cb03bfe3db45272597a6c8c094
+
+# coordinate['lat']=pd.to_numeric(coordinate['lat'])
+# coordinate['lon']=pd.to_numeric(coordinate['lon'])
+
 
 #classement des données        
 coordinate_sort_lat =  coordinate.copy()
@@ -335,29 +334,36 @@ coordinate_sort_lon = load_coordinate('dataFrame/tabLonSmall.tfk')
 #lecture du .GPX
 pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
-<<<<<<< HEAD
-node_list=pd.DataFrame(0.1,index=np.arange(len(pt_gpx)),columns=['id', 'lat', 'lon'])
-
-=======
 #creation des sorties
 node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
 street_list=node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
->>>>>>> 8bc87c29990668cb03bfe3db45272597a6c8c094
 
 #Analyse pour chacun des points GPS le noeud OSM le plus proche
 #node_list contient tout les identifiants des points imapactés par le tracé 
 #street_list contient les informations des rues imapctés
+
+
 for i in range(len(pt_gpx)):
 
+    #reduction du champs des possibles
+    pt_gpx.iloc[i,:]
+    a=coordinate[coordinate['lat']>pt_gpx.iloc[i,:][1]-0.001]
+    lat_reduce=coordinate[coordinate['lat']<pt_gpx.iloc[i,:][1]+0.001]    
+    b=lat_reduce[coordinate['lon']>pt_gpx.iloc[i,:][0]-0.001]
+    reduce=b[coordinate['lon']<pt_gpx.iloc[i,:][0]+0.001]
     
-    ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon , coordinate_sort_lat)
+    #renvoi du champs des possibles vers coordinate
+    m=coordinate.id.isin(reduce.id)
+    
+    
+    ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon[m].reset_index(drop=True) , coordinate_sort_lat[m].reset_index(drop=True))
     #print("ID : "+str(ret['id']))
     #print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
     # print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
     temp=check_way_from_point(int(ret['id']),root)
     try : 
         street_list.append(temp)
-        except IndexError:
+    except IndexError:
             "Do nothing"
         
     node_list=node_list.append(ret)
@@ -449,44 +455,3 @@ b[coordinate['lon']<point[1]+0.00001]
 
 
 
-#lecture du .GPX
-pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
-
-#creation des sorties
-node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
-street_list=node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
-
-#Analyse pour chacun des points GPS le noeud OSM le plus proche
-#node_list contient tout les identifiants des points imapactés par le tracé 
-#street_list contient les informations des rues imapctés
-
-
-for i in range(len(pt_gpx)):
-
-    #reduction du champs des possibles
-    pt_gpx.iloc[i,:]
-    a=coordinate[coordinate['lat']>pt_gpx.iloc[i,:][1]-0.00001]
-    lat_reduce=coordinate[coordinate['lat']<pt_gpx.iloc[i,:][1]+0.00001]    
-    b=lat_reduce[coordinate['lon']>pt_gpx.iloc[i,:][0]-0.00001]
-    reduce=b[coordinate['lon']<pt_gpx.iloc[i,:][0]+0.00001]
-    
-    #renvoi du champs des possibles vers coordinate
-    m=coordinate.id.isin(reduce.id)
-    
-    
-    ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon[m].reset_index(drop=True) , coordinate_sort_lat[m].reset_index(drop=True))
-    #print("ID : "+str(ret['id']))
-    #print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
-    # print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
-    temp=check_way_from_point(int(ret['id']),root)
-    try : 
-        street_list.append(temp)
-    except IndexError:
-            "Do nothing"
-        
-    node_list=node_list.append(ret)
-    street_list=street_list.append(pd.DataFrame({'name':[temp[0][1]],'id':[temp[0][0]]}))
-
-
-#afficher les rues uniques impacté par le tracé 
-print(street_list['name'].unique())
