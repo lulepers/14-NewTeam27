@@ -232,9 +232,41 @@ def check_way_from_point(node_id, root) :
 
 
 
+class nodes:
+    def __init__(self):
+        self.id=''
+        self.lat=''
+        self.lon=''
+
+
+#prend le fichier OSM en entrée et ressort un DF avec les coordonnées 
+def get_OSM_nodes(root) :            
+    output=pd.DataFrame(0.1,index=np.arange(1),columns=['id', 'lat', 'lon'])
+    for type_tag in root.iter('node'):
+        node=nodes()
+        node.id=type_tag.get('id')
+        node.lon=type_tag.get('lon')
+        node.lat=type_tag.get('lat')
+        interm={'id':node.id,'lon':node.lon,'lat':node.lat}
+        output=output.append(interm,ignore_index=True)
+        #print(node.id,node.lat,node.lon)
+    output=output.drop(0)
+    return output
+
+
+
+
+
+
+
+
+
+
 
 root = ET.parse('cartes/map.osm').getroot() 
 coordinate = get_OSM_nodes(root)  
+coordinate=coordinate.reset_index(drop=True)
+
 coordinate['id']=int(coordinate['id'])
 
 
@@ -276,65 +308,6 @@ partie test
 """"
 
 
-#test
-
-#coordonnées des noeuds OSM    
-plt.scatter(coordinate['lat'],coordinate['lon'])
-plt.axis([50.56,50.64,4.625,4.825])
-
-
-#coordonnée des pt GPX
-plt.scatter(pt_gpx[1],pt_gpx[0])
-plt.axis([50.56,50.64,4.625,4.825])
-
-
-plt.scatter(node_list['lat'],node_list['lon'])
-plt.axis([50.56,50.64,4.625,4.825])
-
-
-
-
-#coordonnées des noeuds OSM    
-plt.scatter(coordinate['lat'],coordinate['lon'])
-plt.axis([50.60,50.63,4.675,4.725])
-
-
-#coordonnées des noeuds OSM    newversion
-plt.scatter(pd.to_numeric(output['lat'], downcast="float"),pd.to_numeric(output['lon'], downcast="float"))
-plt.axis([50.60,50.63,4.675,4.725])
-
-#coordonnée des pt GPX
-plt.scatter(pt_gpx[1],pt_gpx[0])
-plt.axis([50.60,50.63,4.675,4.725])
-
-
-plt.scatter(node_list['lat'],node_list['lon'])
-plt.axis([50.60,50.63,4.675,4.725])
-
-
-#test de trouver les coordonnées sans l'handler
-
-
-class nodes:
-    def __init__(self):
-        self.id=''
-        self.lat=''
-        self.lon=''
-
-
-#prend le fichier OSM en entrée et ressort un DF avec les coordonnées 
-def get_OSM_nodes(root) :            
-    output=pd.DataFrame(0.1,index=np.arange(1),columns=['id', 'lat', 'lon'])
-    for type_tag in root.iter('node'):
-        node=nodes()
-        node.id=type_tag.get('id')
-        node.lon=type_tag.get('lon')
-        node.lat=type_tag.get('lat')
-        interm={'id':node.id,'lon':node.lon,'lat':node.lat}
-        output=output.append(interm,ignore_index=True)
-        #print(node.id,node.lat,node.lon)
-        output=output.drop(0)
-    return output
 
 
 
