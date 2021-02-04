@@ -175,6 +175,8 @@ def get_coordinate(file):
     return coordinate
 
 #Définition de la classe de chemin
+
+
 class ways:
     def __init__(self):
         self.name=''
@@ -252,10 +254,16 @@ coordinate['lon']=pd.to_numeric(coordinate['lon'])
 coordinate_sort_lat =  coordinate.copy()
 coordinate_sort_lon =  coordinate.copy()
 
-quickSort(coordinate_sort_lat, 'lat')
-quickSort(coordinate_sort_lon, 'lon')
+# coordinate_sort_lat.sort_values(by=['lat'])
+# coordinate_sort_lon.sort_values(by=['lon'])
 
+# save_coordinate(coordinate, 'dataFrame/tabSmall.tfk')
+# save_coordinate(coordinate_sort_lat, 'dataFrame/tabLatSmall.tfk')
+# save_coordinate(coordinate_sort_lon, 'dataFrame/tabLonSmall.tfk')
 
+coordinate = load_coordinate('dataFrame/tabSmall.tfk')
+coordinate_sort_lat = load_coordinate('dataFrame/tabLatSmall.tfk')
+coordinate_sort_lon = load_coordinate('dataFrame/tabLonSmall.tfk')
 
 
 """Partie 3 : Calcul des points OSM correspondant aux tracé GPS"""
@@ -286,11 +294,11 @@ for i in range(len(pt_gpx)):
 print(street_list['name'].unique())
 
 
-""""
+"""
 partie test : Cette partie permet de sortir le fichier . GPX des noeuds OSM et ainsi montrer
 la fidélité du tracé 
 
-""""
+"""
 
 
 
