@@ -6,7 +6,7 @@ Created on Wed Feb  3 08:30:47 2021
 """
 
 
-"""Partie 1 : Récupération des coordonnées des noeuds à partir d'un fichier OSM"""
+"""Partie 1 : Packages Fonction et classe"""
 import numpy as np
 import osmium as osm
 import pandas as pd
@@ -30,9 +30,6 @@ def read_gpx(gpx_file):
                 liste_point.append([point.longitude,point.latitude])
                 
     return pd.DataFrame(liste_point)                
-
-
-
 
 
 #QuickSort
@@ -176,30 +173,15 @@ def get_coordinate(file):
         coordinate.loc[i]['lat']=df_osm.loc[i]['location'].y/10000000
         coordinate.loc[i]['lon']=df_osm.loc[i]['location'].x/10000000
     return coordinate
-    
-  
-    
-    
-"""Partie 2 : Fonction pour identifier les segments """
 
 #Définition de la classe de chemin
-
-
 class ways:
     def __init__(self):
         self.name=''
         self.id=''
         self.nodes=list()
     
-# test=ways()
-# ways.name='paul'    
-
-
-
-#exemple de point 
 #test=int(coordinate.loc[1]['id'])
-
-
 
 #La fonction prend en entrée l'identifiant d'un point et ressort une slite de liste
 # type ((identifiant,Nom),(identifiant,Nom),(identifiant,Nom))" 
@@ -228,7 +210,9 @@ def check_way_from_point(node_id, root) :
     return(output)
 
 
-
+    
+  
+   
 class nodes:
     def __init__(self):
         self.id=''
@@ -251,60 +235,93 @@ def get_OSM_nodes(root) :
     return output
 
 
-
-def save_coordinate(tab, filename):
-    tab.to_pickle(filename)
-
-def load_coordinate(filename):
-    return pd.read_pickle(filename)
-
-root = ET.parse('cartes/map2.osm').getroot() 
+ 
+    
+"""Partie 2 : Traitement unique des données OSM  """
 
 
-#pour charger une nouvelle carte
-# coordinate = get_OSM_nodes(root)  
-# coordinate=coordinate.reset_index(drop=True)
+#lecture du .OSM
+root = ET.parse('map2.osm').getroot() 
+coordinate = get_OSM_nodes(root)  
+coordinate=coordinate.reset_index(drop=True)
+
+coordinate['lat']=pd.to_numeric(coordinate['lat'])
+coordinate['lon']=pd.to_numeric(coordinate['lon'])
+
+#classement des données        
+coordinate_sort_lat =  coordinate.copy()
+coordinate_sort_lon =  coordinate.copy()
+
+quickSort(coordinate_sort_lat, 'lat')
+quickSort(coordinate_sort_lon, 'lon')
 
 
 
 
-# coordinate['lat']=pd.to_numeric(coordinate['lat'])
-# coordinate['lon']=pd.to_numeric(coordinate['lon'])
-     
-# coordinate_sort_lat =  coordinate.copy()
-# coordinate_sort_lon =  coordinate.copy()
+"""Partie 3 : Calcul des points OSM correspondant aux tracé GPS"""
 
-
-# coordinate_sort_lat.sort_values(by=['lat'])
-# coordinate_sort_lon.sort_values(by=['lon'])
-
-# save_coordinate(coordinate, 'dataFrame/tabSmall.tfk')
-# save_coordinate(coordinate_sort_lat, 'dataFrame/tabLatSmall.tfk')
-# save_coordinate(coordinate_sort_lon, 'dataFrame/tabLonSmall.tfk')
-
-coordinate = load_coordinate('dataFrame/tabSmall.tfk')
-coordinate_sort_lat = load_coordinate('dataFrame/tabLatSmall.tfk')
-coordinate_sort_lon = load_coordinate('dataFrame/tabLonSmall.tfk')
-
+#lecture du .GPX
 pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
-node_list=pd.DataFrame(0.1,index=np.arange(len(pt_gpx)),columns=['id', 'lat', 'lon'])
-print("ok")
+#creation des sorties
+node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
+street_list=node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
 
+#Analyse pour chacun des points GPS le noeud OSM le plus proche
+#node_list contient tout les identifiants des points imapactés par le tracé 
+#street_list contient les informations des rues imapctés
 for i in range(len(pt_gpx)):
 
     ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon , coordinate_sort_lat)
-    print("ID : "+str(ret['id']))
-    print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
-    print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
-    check_way_from_point(int(ret['id']),root)
+    #print("ID : "+str(ret['id']))
+    #print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
+    # print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
+    temp=check_way_from_point(int(ret['id']),root)
+    street_list.append(temp)
+    node_list=node_list.append(ret)
+    street_list=street_list.append(pd.DataFrame({'name':[temp[0][1]],'id':[temp[0][0]]}))
+
+
+#afficher les rues uniques impacté par le tracé 
+print(street_list['name'].unique())
+
+
+""""
+partie test : Cette partie permet de sortir le fichier . GPX des noeuds OSM et ainsi montrer
+la fidélité du tracé 
+
+""""
+
+
+
+# Creating a new file:
+# --------------------
+
+gpx = gpxpy.gpx.GPX()
+
+# Create first track in our GPX:
+gpx_track = gpxpy.gpx.GPXTrack()
+gpx.tracks.append(gpx_track)
+
+# Create first segment in our GPX track:
+gpx_segment = gpxpy.gpx.GPXTrackSegment()
+gpx_track.segments.append(gpx_segment)
+
+# Create points:
+for elem in node_list.iterrows():
+    gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(elem[1][1],elem[1][2], elevation=0))
+    print(elem)
     
-    node_list.append(ret)
-    
-    print()    
+
+# You can add routes and waypoints, too...
 
 
 
+file = open('gpx2.gpx','w')
+file.write( gpx.to_xml())
+file.close
+
+print('Created GPX:', gpx.to_xml())
 
 
 
