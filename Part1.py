@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 import gpxpy
 import gpxpy.gpx
 import math
-
+import matplotlib.pyplot as plt
 
 
 
@@ -231,6 +231,11 @@ def check_way_from_point(node_id, root) :
 
 
 
+def save_coordinate(tab, path):
+    tab.to_pickle(path)
+
+def load_coordinate(path):
+    return pd.read_pickle(path)
 
  
 coordinate = get_coordinate ("cartes/map.osm") 
@@ -241,18 +246,36 @@ root = ET.parse('cartes/map.osm').getroot()
 
 # check_way_from_point(node_id,root)
 
+#sauvegarde
+# a=coordinate.copy()
+# b=coordinate.copy()
         
-coordinate_sort_lat =  coordinate.copy()
-coordinate_sort_lon =  coordinate.copy()
+# quickSort(a, 'lat')
+# quickSort(b, 'lon')
+# save_coordinate(a,'dataFrame/tabLatSmall.tfk')
+# save_coordinate(b,'dataFrame/tabLonSmall.tfk')
 
-quickSort(coordinate_sort_lat, 'lat')
-quickSort(coordinate_sort_lon, 'lon')
-
+coordinate_sort_lat =  load_coordinate('dataFrame/tabLatSmall.tfk')
+coordinate_sort_lon =  load_coordinate('dataFrame/tabLonSmall.tfk')
 
 
 pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
 
+coords_gps = []
+coords_nodes = []
+coords_nodes_found = []
+        
+#♠pour graphes  
+X_min=360
+Y_min = 360
+X_max=0
+Y_max=0
+for i in range(len(coordinate)):
+    l = coordinate.iloc[i,:]
+    coords_nodes.append((l['lon'],l['lat']))
+
+#
 for i in range(len(pt_gpx)):
 
     ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon , coordinate_sort_lat)
@@ -261,10 +284,56 @@ for i in range(len(pt_gpx)):
     print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
     check_way_from_point(int(ret['id']),root)
     print()    
+    
+    
+            
+    #♠pour graphes  
+    coords_nodes_found.append((ret['lon'],ret['lat'] ))
+    coords_gps.append((pt_gpx.iloc[i,0],pt_gpx.iloc[i,1]))
+          
+    
+    if pt_gpx.iloc[i,0] < X_min:
+        X_min = pt_gpx.iloc[i,0] 
+    elif pt_gpx.iloc[i,0] > X_max:
+        X_max = pt_gpx.iloc[i,0]
+        
+    if pt_gpx.iloc[i,1] < Y_min:
+        Y_min = pt_gpx.iloc[i,1] 
+    elif pt_gpx.iloc[i,1] > Y_max:
+        Y_max = pt_gpx.iloc[i,1]
+      
+        
+X_gps = np.array(coords_gps)
+X_nodes_found = np.array(coords_nodes_found) 
+X_nodes = np.array(coords_nodes)   
+
+ 
+plt.plot(X_gps[:,0], X_gps[:,1], 'o')
+plt.xlim(X_min, X_max)
+plt.ylim(Y_min, Y_max)
+plt.title('GPS')
+plt.show()    
+    
+
+plt.plot(X_nodes_found[:,0], X_nodes_found[:,1], 'o')
+plt.xlim(X_min, X_max)
+plt.ylim(Y_min, Y_max)
+plt.title('Node Found')
+plt.show() 
 
 
+plt.plot(X_nodes[:,0], X_nodes[:,1], 'o')
+plt.xlim(X_min, X_max) 
+plt.ylim(Y_min, Y_max)
+plt.title('Node')
+plt.show()     
+    
+    
+    
+    
+    
+    
+    
+    
 
-
-
-
-
+                      
