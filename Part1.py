@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed Feb  3 08:30:47 2021
-
 @author: Henry
 """
 
@@ -238,6 +237,13 @@ def get_OSM_nodes(root) :
 
 
  
+
+def save_coordinate(tab, filename):
+    tab.to_pickle(filename)
+
+def load_coordinate(filename):
+    return pd.read_pickle(filename)
+
     
 """Partie 2 : Traitement unique des données OSM  """
 
@@ -280,12 +286,17 @@ street_list=node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
 #street_list contient les informations des rues imapctés
 for i in range(len(pt_gpx)):
 
+    
     ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon , coordinate_sort_lat)
     #print("ID : "+str(ret['id']))
     #print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
     # print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
     temp=check_way_from_point(int(ret['id']),root)
-    street_list.append(temp)
+    try : 
+        street_list.append(temp)
+        except IndexError:
+            "Do nothing"
+        
     node_list=node_list.append(ret)
     street_list=street_list.append(pd.DataFrame({'name':[temp[0][1]],'id':[temp[0][0]]}))
 
@@ -297,7 +308,6 @@ print(street_list['name'].unique())
 """
 partie test : Cette partie permet de sortir le fichier . GPX des noeuds OSM et ainsi montrer
 la fidélité du tracé 
-
 """
 
 
@@ -334,8 +344,55 @@ print('Created GPX:', gpx.to_xml())
 
 
 
+#test find enarest point
+point=[pt_gpx[1][0],pt_gpx[0][0]]
+
+a=coordinate[coordinate['lat']>point[0]-0.00001]
+a[coordinate['lat']<point[0]+0.00001]
+
+b=a[coordinate['lon']>point[1]-0.00001]
+b[coordinate['lon']<point[1]+0.00001]
 
 
 
+#lecture du .GPX
+pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
+
+#creation des sorties
+node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
+street_list=node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
+
+#Analyse pour chacun des points GPS le noeud OSM le plus proche
+#node_list contient tout les identifiants des points imapactés par le tracé 
+#street_list contient les informations des rues imapctés
 
 
+for i in range(len(pt_gpx)):
+
+    #reduction du champs des possibles
+    pt_gpx.iloc[i,:]
+    a=coordinate[coordinate['lat']>pt_gpx.iloc[i,:][1]-0.00001]
+    lat_reduce=coordinate[coordinate['lat']<pt_gpx.iloc[i,:][1]+0.00001]    
+    b=lat_reduce[coordinate['lon']>pt_gpx.iloc[i,:][0]-0.00001]
+    reduce=b[coordinate['lon']<pt_gpx.iloc[i,:][0]+0.00001]
+    
+    #renvoi du champs des possibles vers coordinate
+    m=coordinate.id.isin(reduce.id)
+    
+    
+    ret = findNearestPoint(pt_gpx.iloc[i,:], coordinate_sort_lon[m].reset_index(drop=True) , coordinate_sort_lat[m].reset_index(drop=True))
+    #print("ID : "+str(ret['id']))
+    #print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
+    # print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
+    temp=check_way_from_point(int(ret['id']),root)
+    try : 
+        street_list.append(temp)
+    except IndexError:
+            "Do nothing"
+        
+    node_list=node_list.append(ret)
+    street_list=street_list.append(pd.DataFrame({'name':[temp[0][1]],'id':[temp[0][0]]}))
+
+
+#afficher les rues uniques impacté par le tracé 
+print(street_list['name'].unique())
