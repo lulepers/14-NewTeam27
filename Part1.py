@@ -171,6 +171,7 @@ def get_coordinate(file):
     df_osm = pd.DataFrame(osmhandler.osm_data, columns=data_colnames)
     coordinate_colnames = ['id','lat','lon']
     coordinate=pd.DataFrame(0.1,index=np.arange(len(df_osm)),columns=coordinate_colnames)
+
     
     #on retransforme un peu les coordonées
     for i in range(len(df_osm)):
@@ -232,9 +233,9 @@ def check_way_from_point(node_id, root) :
 
 
 
- 
-coordinate = get_coordinate ("cartes/map.osm") 
-root = ET.parse('cartes/map.osm').getroot()
+root = ET.parse('cartes/map.osm').getroot() 
+coordinate = get_OSM_nodes(root)  
+coordinate['id']=int(coordinate['id'])
 
 
 # node_id=284161125           #  correspond à un point d'intersection
@@ -252,6 +253,8 @@ quickSort(coordinate_sort_lon, 'lon')
 
 pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
+node_list=pd.DataFrame(0.1,index=np.arange(len(pt_gpx)),columns=coordinate_colnames)
+
 
 for i in range(len(pt_gpx)):
 
@@ -260,7 +263,79 @@ for i in range(len(pt_gpx)):
     print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
     print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
     check_way_from_point(int(ret['id']),root)
+    
+    node_list.append(ret)
+    
     print()    
+
+
+
+""""
+partie test
+
+""""
+
+
+#test
+
+#coordonnées des noeuds OSM    
+plt.scatter(coordinate['lat'],coordinate['lon'])
+plt.axis([50.56,50.64,4.625,4.825])
+
+
+#coordonnée des pt GPX
+plt.scatter(pt_gpx[1],pt_gpx[0])
+plt.axis([50.56,50.64,4.625,4.825])
+
+
+plt.scatter(node_list['lat'],node_list['lon'])
+plt.axis([50.56,50.64,4.625,4.825])
+
+
+
+
+#coordonnées des noeuds OSM    
+plt.scatter(coordinate['lat'],coordinate['lon'])
+plt.axis([50.60,50.63,4.675,4.725])
+
+
+#coordonnées des noeuds OSM    newversion
+plt.scatter(pd.to_numeric(output['lat'], downcast="float"),pd.to_numeric(output['lon'], downcast="float"))
+plt.axis([50.60,50.63,4.675,4.725])
+
+#coordonnée des pt GPX
+plt.scatter(pt_gpx[1],pt_gpx[0])
+plt.axis([50.60,50.63,4.675,4.725])
+
+
+plt.scatter(node_list['lat'],node_list['lon'])
+plt.axis([50.60,50.63,4.675,4.725])
+
+
+#test de trouver les coordonnées sans l'handler
+
+
+class nodes:
+    def __init__(self):
+        self.id=''
+        self.lat=''
+        self.lon=''
+
+
+#prend le fichier OSM en entrée et ressort un DF avec les coordonnées 
+def get_OSM_nodes(root) :            
+    output=pd.DataFrame(0.1,index=np.arange(1),columns=['id', 'lat', 'lon'])
+    for type_tag in root.iter('node'):
+        node=nodes()
+        node.id=type_tag.get('id')
+        node.lon=type_tag.get('lon')
+        node.lat=type_tag.get('lat')
+        interm={'id':node.id,'lon':node.lon,'lat':node.lat}
+        output=output.append(interm,ignore_index=True)
+        #print(node.id,node.lat,node.lon)
+        output=output.drop(0)
+    return output
+
 
 
 
