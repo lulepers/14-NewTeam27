@@ -13,8 +13,8 @@ import xml.etree.ElementTree as ET
 import gpxpy
 import gpxpy.gpx
 import math
-import matplotlib as plt
-import time
+import matplotlib.pyplot as plt
+#import time
 
 
 
@@ -114,7 +114,6 @@ def distanceSQ(x1, y1, x2,y2):
     return (x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)
         
 def findNearestPoint(pt_gps, coordinate_sort_lon, coordinate_sort_lat):
-    t1 = time.clock()
     nearest_by_lon = coordinate_sort_lon.iloc[binaryNearest(coordinate_sort_lon, pt_gps[0],'lon'),:]
     distMax = distance(pt_gps[0], pt_gps[1], nearest_by_lon['lon'], nearest_by_lon['lat'])
     
@@ -129,8 +128,7 @@ def findNearestPoint(pt_gps, coordinate_sort_lon, coordinate_sort_lat):
     # id_min_lat = coordinate_sort_lat.iloc[binaryNearest(coordinate_sort_lat, pt_gps[1]-distMax,'lat'),:]['id']
     # id_max_lat = coordinate_sort_lat.iloc[binaryNearest(coordinate_sort_lat, pt_gps[1]+distMax,'lat'),:]['id']
 
-    
-    t1 = time.clock()
+
     l = (id_min_lat+id_max_lat)//2
     r = l+1
     nearest = r
@@ -243,7 +241,7 @@ def check_way_from_point(node_id, root) :
         except ValueError:
             "Do nothing"
         else: 
-            print(way.id,way.name)
+            #print(way.id,way.name)
             output.append([way.id,way.name])    
     return(output)
 
@@ -336,7 +334,7 @@ pt_gpx = read_gpx(open('gpx/Balade-saisonniere-06-03-2021.gpx', 'r'))
 
 #creation des sorties
 node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
-street_list=node_list=pd.DataFrame(columns=['id', 'lat', 'lon'])
+street_list=pd.DataFrame(columns=['name', 'id'])
 
 #Analyse pour chacun des points GPS le noeud OSM le plus proche
 #node_list contient tout les identifiants des points imapactés par le tracé 
@@ -361,13 +359,12 @@ for i in range(len(pt_gpx)):
     #print("lon : "+str(ret['lon'])+"  "+str(pt_gpx.iloc[i,0]))
     # print("lat : "+str(ret['lat'])+"  "+str(pt_gpx.iloc[i,1]))
     temp=check_way_from_point(int(ret['id']),root)
-    try : 
-        street_list.append(temp)
-    except IndexError:
-            "Do nothing"
         
-    node_list=node_list.append(ret)
-    street_list=street_list.append(pd.DataFrame({'name':[temp[0][1]],'id':[temp[0][0]]}))
+    node_list = node_list.append(ret)
+
+    for i in range(len(temp)):    
+        if(temp[i][1]!=''):           
+           street_list = street_list.append(pd.DataFrame({'name':[temp[i][1]],'id':[temp[i][0]]}))
 
 
 #afficher les rues uniques impacté par le tracé 
@@ -397,7 +394,7 @@ gpx_track.segments.append(gpx_segment)
 # Create points:
 for elem in node_list.iterrows():
     gpx_segment.points.append(gpxpy.gpx.GPXTrackPoint(elem[1][1],elem[1][2], elevation=0))
-    print(elem)
+    #print(elem)
     
 
 # You can add routes and waypoints, too...
@@ -407,8 +404,8 @@ for elem in node_list.iterrows():
 file = open('gpx2.gpx','w')
 file.write( gpx.to_xml())
 file.close
-
-print('Created GPX:', gpx.to_xml())
+print('Created GPX:!')
+#print('Created GPX:', gpx.to_xml())
 
 
 #coordonnées des noeuds OSM
