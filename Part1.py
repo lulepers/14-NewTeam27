@@ -294,7 +294,7 @@ for i in range(len(pt_gpx)):
     temp=check_way_from_point(int(ret['id']),root)
     try : 
         street_list.append(temp)
-        except IndexError:
+    except IndexError:
             "Do nothing"
         
     node_list=node_list.append(ret)

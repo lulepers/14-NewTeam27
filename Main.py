@@ -17,17 +17,35 @@ import matplotlib.pyplot as plt
 import os
 import _Functions
 import numpy as np
-#import time
 
-#This value need to be changed if the program work on a different area
+
+#path to the osm map of reference
 osm_path='cartes/map2.osm'  
+
+#path of gpx files
+gpx_load_path = 'gpx/Brocante-Culee-26-05-2021.gpx'
+gpx_save_path = 'gpx2.gpx'
+
+#needed when a new OSM map is used
+need_reload_osm = True
+
+#radius of search around gpx Node in order to find a OSM node, if too small return
+#an error because it cannot find any, bigger = slower running time
+search_radius = 0.001
+
+#if True, draw some graph with pyplot
+draw_graph = True
+
+
 
 
 
 #OSM processing will process OSM in order to create file that serve for analysis
 #can take a few minutes 
 root = ET.parse(osm_path).getroot() 
-_Functions.process_osm(root)
+
+if need_reload_osm:
+    _Functions.process_osm(root)
 
     
 """Partie 2 : CHargement des données OSM transformées  """
@@ -40,11 +58,11 @@ coordinate_sort_lon = _Functions.load_coordinate('dataFrame/tabLonSmall.tfk')
 
 """Partie 3 : Calcul des points OSM correspondant aux tracé GPS"""
 
-file='gpx/Brocante-Culee-26-05-2021.gpx'
-pt_gpx=_Functions.read_gpx(open(file))
+pt_gpx=_Functions.read_gpx(open(gpx_load_path))
 
 
-street_list,node_list= _Functions.GPX_track(root,coordinate,coordinate_sort_lat,coordinate_sort_lon,file)
+street_list,node_list= _Functions.GPX_track(root,coordinate,coordinate_sort_lat,coordinate_sort_lon,search_radius,gpx_load_path)
+_Functions.OSM_to_GPX(node_list,gpx_save_path)
 
 #save the street_list 
 
@@ -59,39 +77,39 @@ partie test : Cette partie permet de sortir le fichier . GPX des noeuds OSM et a
 la fidélité du tracé 
 """
 
+if draw_graph:
 
-
-#coordonnées des noeuds OSM
-plt.scatter(coordinate['lat'],coordinate['lon'])
-plt.axis([50.56,50.64,4.625,4.825])
-
-
-#coordonnée des pt GPX
-plt.scatter(pt_gpx[1],pt_gpx[0])
-plt.axis([50.56,50.64,4.625,4.825])
-
-
-plt.scatter(node_list['lat'],node_list['lon'])
-plt.axis([50.56,50.64,4.625,4.825])
-
-
-
-
-#coordonnées des noeuds OSM
-plt.scatter(coordinate['lat'],coordinate['lon'])
-plt.axis([50.60,50.63,4.675,4.725])
-
-
-#coordonnées des noeuds OSM    newversion
-plt.scatter(pd.to_numeric(node_list['lat'], downcast="float"),pd.to_numeric(node_list['lon'], downcast="float"))
-plt.axis([50.60,50.63,4.675,4.725])
-
-#coordonnée des pt GPX
-plt.scatter(pt_gpx[1],pt_gpx[0])
-plt.axis([50.60,50.63,4.675,4.725])
-
-
-plt.scatter(node_list['lat'],node_list['lon'])
-plt.axis([50.60,50.63,4.675,4.725])
+    #coordonnées des noeuds OSM
+    plt.scatter(coordinate['lat'],coordinate['lon'])
+    plt.axis([50.56,50.64,4.625,4.825])
+    
+    
+    #coordonnée des pt GPX
+    plt.scatter(pt_gpx[1],pt_gpx[0])
+    plt.axis([50.56,50.64,4.625,4.825])
+    
+    
+    plt.scatter(node_list['lat'],node_list['lon'])
+    plt.axis([50.56,50.64,4.625,4.825])
+    
+    
+    
+    
+    #coordonnées des noeuds OSM
+    plt.scatter(coordinate['lat'],coordinate['lon'])
+    plt.axis([50.60,50.63,4.675,4.725])
+    
+    
+    #coordonnées des noeuds OSM    newversion
+    plt.scatter(pd.to_numeric(node_list['lat'], downcast="float"),pd.to_numeric(node_list['lon'], downcast="float"))
+    plt.axis([50.60,50.63,4.675,4.725])
+    
+    #coordonnée des pt GPX
+    plt.scatter(pt_gpx[1],pt_gpx[0])
+    plt.axis([50.60,50.63,4.675,4.725])
+    
+    
+    plt.scatter(node_list['lat'],node_list['lon'])
+    plt.axis([50.60,50.63,4.675,4.725])
 
 
