@@ -22,7 +22,8 @@ There is a _Functions.py that containt all classes and functions used by the cod
 There is a main.py were the most important functions and paramaters are used. 
 	For modify the data
 	at line 23 : osm_path='cartes/map2.osm'  : you can change the name of the map.osm you're using for your server
-	at line 43 : file='gpx/Brocante-Culee-26-05-2021.gpx' : you can modify the name of the .GPX file you want to analyse 
+	at line 26 : file='gpx/Brocante-Culee-26-05-2021.gpx' : you can modify the name of the .GPX file you want to analyse 
+	
 
 The main functions allow different thing
 	In Part1 you will be able to process map.osm in order to create file that will be used later for GPX analysis. It must be run only once. 
