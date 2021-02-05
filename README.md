@@ -1,6 +1,9 @@
 # 14-NewTime27
 Hackathon Hack your City février 2021
 
+For the Mockup and dashboard, go see Mock_Up_14.fig
+For the presentation, go see Présentation_14.pdf (there are used ressources before the presentation wich begin at the page 25)
+
 
 #Introduction
 The following code allow you to map to OSM data any kind of GPS tracing record in .GPX format. This code will be usefull if used to connect an events DataBase with .GPX file
