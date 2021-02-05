@@ -308,7 +308,7 @@ def process_osm(root):
 
 
 #Permet de connaitre la liste des noeuds et les chemins impactés par un tracé GPS
-def GPX_track(root,coordinate,coordinate_sort_lat,coordinate_sort_lon,file='gpx/Balade-saisonniere-06-03-2021.gpx'):
+def GPX_track(root,coordinate,coordinate_sort_lat,coordinate_sort_lon,search_radius,file='gpx/Balade-saisonniere-06-03-2021.gpx'):
 
     
     #lecture du .GPX
@@ -327,10 +327,10 @@ def GPX_track(root,coordinate,coordinate_sort_lat,coordinate_sort_lon,file='gpx/
 
         #reduction du champs des possibles
         pt_gpx.iloc[i,:]
-        a=coordinate[coordinate['lat']>pt_gpx.iloc[i,:][1]-0.001]
-        lat_reduce=coordinate[coordinate['lat']<pt_gpx.iloc[i,:][1]+0.001]    
-        b=lat_reduce[coordinate['lon']>pt_gpx.iloc[i,:][0]-0.001]
-        reduce=b[coordinate['lon']<pt_gpx.iloc[i,:][0]+0.001]
+        a=coordinate[coordinate['lat']>pt_gpx.iloc[i,:][1]-search_radius]
+        lat_reduce=coordinate[coordinate['lat']<pt_gpx.iloc[i,:][1]+search_radius]    
+        b=lat_reduce[coordinate['lon']>pt_gpx.iloc[i,:][0]-search_radius]
+        reduce=b[coordinate['lon']<pt_gpx.iloc[i,:][0]+search_radius]
     
         #renvoi du champs des possibles vers coordinate
         m=coordinate.id.isin(reduce.id)
@@ -357,7 +357,7 @@ def GPX_track(root,coordinate,coordinate_sort_lat,coordinate_sort_lon,file='gpx/
 
 
 #Give the coordinate of the OSM nodes that correspond to GPX and record them in a GPX file
-def OSM_to_GPX(node_list) :
+def OSM_to_GPX(node_list, path) :
 # Creating a new file:
 # --------------------
     gpx = gpxpy.gpx.GPX()
@@ -379,7 +379,7 @@ def OSM_to_GPX(node_list) :
 
 
 
-    file = open('gpx2.gpx','w')
+    file = open(path,'w')
     file.write( gpx.to_xml())
     file.close
     print('Created GPX:!')
